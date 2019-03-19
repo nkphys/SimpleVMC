@@ -67,6 +67,7 @@ public:
 	const int& size_L2(void) const { return size_.L2(); }
 	const int& size_L3(void) const { return size_.L3(); }
 	const int& num_sites(void) const { return num_sites_; }
+	const int& num_bonds(void) const { return num_bonds_; }
 	const int& num_basis_sites(void) const { return num_basis_sites_; }
 	const int& num_kpoints(void) const { return num_kpoints_; }
 	const int& num_neighbs(void) const { return num_neighbs_; }

@@ -23,6 +23,7 @@ SRC = main.cpp
 SRC+= lattice.cpp
 SRC+= random.cpp
 SRC+= basis.cpp
+SRC+= wavefunction.cpp
 SRCS=$(addprefix src/,$(SRC))
 #-------------------------------------------------------------
 # Headers
@@ -31,6 +32,7 @@ HDR+= lattice.h
 HDR+= random.h
 HDR+= basis.h
 HDR+= matrix.h
+HDR+= wavefunction.h
 HDRS=$(addprefix src/,$(HDR))
 #-------------------------------------------------------------
 # Target
