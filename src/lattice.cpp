@@ -1,10 +1,10 @@
 /*---------------------------------------------------------------------------
 * @Author: amedhi
 * @Date:   2019-03-19 13:12:20
-* @Last Modified by:   amedhi
-* @Last Modified time: 2019-03-19 13:42:09
+* @Last Modified by:   Amal Medhi, amedhi@mbpro
+* @Last Modified time: 2019-03-19 16:52:38
 *----------------------------------------------------------------------------*/
-// File: lattice.hh
+// File: lattice.cpp
 
 #include <Eigen/Dense>
 #include "constants.h"

@@ -63,6 +63,7 @@ public:
 	Lattice(const lattice_id& id, const lattice_size& size) { construct(id, size); }
 	void construct(const lattice_id& id, const lattice_size& size);
 	~Lattice() {}
+	const lattice_id& id(void) const { return id_; }
 	const int& size_L1(void) const { return size_.L1(); }
 	const int& size_L2(void) const { return size_.L2(); }
 	const int& size_L3(void) const { return size_.L3(); }
