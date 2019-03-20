@@ -2,7 +2,7 @@
 * @Author: Amal Medhi, amedhi@mbpro
 * @Date:   2019-03-19 14:22:06
 * @Last Modified by:   Amal Medhi, amedhi@mbpro
-* @Last Modified time: 2019-03-20 12:43:05
+* @Last Modified time: 2019-03-20 16:38:04
 *----------------------------------------------------------------------------*/
 // File: wavefunction.cpp
 #include "wavefunction.h"
@@ -63,7 +63,7 @@ void Wavefunction::compute(const Lattice& lattice, const RealVector& vparams,
 void Wavefunction::compute_BCS(const Lattice& lattice, const RealVector& vparams, 
     const int& start_pos, const bool& psi_gradient)
 {
-  if (lattice.id() != lattice_id::SQUARE) {
+  if (lattice.id() == lattice_id::SQUARE) {
 
     // Chemical potential (non-interacting system) 
     ch_potential_ = 0.0;
@@ -110,6 +110,7 @@ void Wavefunction::compute_BCS(const Lattice& lattice, const RealVector& vparams
           phi_k[k] = deltak/(ek+eps_k);
         }
       }
+      //std::cout << "phi_k["<<k<<"] = "<<phi_k[k]<<"\n"; getchar();
     }
     // pair amplitudes in lattice space
     for (int i=0; i<num_sites_; ++i) {

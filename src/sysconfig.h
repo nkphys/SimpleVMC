@@ -7,6 +7,7 @@
 // File: sysconfig.h
 #ifndef SYSCONFIG_H
 #define SYSCONFIG_H
+
 #include "lattice.h"
 #include "wavefunction.h"
 #include "basis.h"
@@ -18,7 +19,10 @@ public:
 	SysConfig(const Lattice& lattice) { init(lattice); }
 	~SysConfig() {}
 	void init(const Lattice& lattice);
-	void update_state(void);
+	int build(const Lattice& lattice, const RealVector& vparams);
+	int reset(void);
+	int update_state(void);
+	const int& num_vparams(void) const { return num_total_vparams_; }
 private:
 	int num_sites_;
 	int num_upspins_;
@@ -28,6 +32,11 @@ private:
 	Wavefunction wf_;
 	ComplexMatrix psi_mat_;
 	ComplexMatrix psi_inv_;
+	// variational parameters
+	int num_total_vparams_;
+	int num_wf_params_;
+	RealVector vparams_;
+
 	// work arrays
   mutable ColVector psi_row_;
   mutable RowVector psi_col_;
@@ -36,6 +45,13 @@ private:
 	// update parameters_
   int num_updates_;
   int refresh_cycle_;
+
+  int do_upspin_hop(void);
+  int do_dnspin_hop(void);
+  int inv_update_upspin(const int& upspin, const ColVector& psi_row, 
+    const std::complex<double>& det_ratio);
+  int inv_update_dnspin(const int& dnspin, const RowVector& psi_col, 
+    const std::complex<double>& det_ratio);
 };
 
 

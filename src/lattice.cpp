@@ -2,7 +2,7 @@
 * @Author: amedhi
 * @Date:   2019-03-19 13:12:20
 * @Last Modified by:   Amal Medhi, amedhi@mbpro
-* @Last Modified time: 2019-03-20 11:49:22
+* @Last Modified time: 2019-03-20 16:18:44
 *----------------------------------------------------------------------------*/
 // File: lattice.cpp
 
@@ -144,6 +144,12 @@ void Lattice::construct_kpoints(void)
   	default: break;
   }
 
+  // set 'antiperiodic boundary' along 'y'
+  Vector3d antipb_shift(0.0,0.0,0.0);
+  if (lattice_dim_==2) {
+    antipb_shift(1) = 0.5/size_.L2();
+  } 
+
   // kpoints
   num_kpoints_ = num_sites_/num_basis_sites_;
   Vector3i n = {0,0,0};
@@ -151,9 +157,9 @@ void Lattice::construct_kpoints(void)
   kpoints_.clear();
   double x1, x2, x3;
   for (int i=0; i<num_kpoints_; ++i) {
-    x1 = static_cast<double>(m(0)+n(0))/size_.L1();
-    x2 = static_cast<double>(m(1)+n(1))/size_.L2();
-    x3 = static_cast<double>(m(2)+n(2))/size_.L3();
+    x1 = static_cast<double>(m(0)+n(0))/size_.L1() + antipb_shift(0);
+    x2 = static_cast<double>(m(1)+n(1))/size_.L2() + antipb_shift(1);
+    x3 = static_cast<double>(m(2)+n(2))/size_.L3() + antipb_shift(2);
     kpoints_.push_back(x1*b1_ + x2*b2_ + x3*b3_);
     n = get_next_bravindex(n);
   }

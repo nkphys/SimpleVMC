@@ -2,7 +2,7 @@
 * @Author: Amal Medhi, amedhi@mbpro
 * @Date:   2019-03-20 11:50:30
 * @Last Modified by:   Amal Medhi, amedhi@mbpro
-* @Last Modified time: 2019-03-20 12:46:54
+* @Last Modified time: 2019-03-20 16:38:09
 *----------------------------------------------------------------------------*/
 // File: sysconfig.cpp
 #include "sysconfig.h"
@@ -16,11 +16,26 @@ void SysConfig::init(const Lattice& lattice)
 	wf_.init(wf_id::BCS, lattice, hole_doping_);
 	num_upspins_ = wf_.num_upspins();
 	num_dnspins_ = wf_.num_dnspins();
-	psi_mat_.resize(num_upspins_,num_dnspins_);
-	psi_inv_.resize(num_upspins_,num_dnspins_);
-	// initial configuration
   basis_state_.init_spins(num_upspins_,num_dnspins_);
+
+  // variational parameters
+  num_wf_params_ = wf_.num_vparams();
+  num_total_vparams_ = num_wf_params_;
+  vparams_.resize(num_total_vparams_);
+
+  // work arrays
+  psi_mat_.resize(num_upspins_,num_dnspins_);
+  psi_inv_.resize(num_upspins_,num_dnspins_);
+  psi_row_.resize(num_dnspins_);
+  psi_col_.resize(num_upspins_);
+  inv_row_.resize(num_upspins_);
+}
+
+int SysConfig::build(const Lattice& lattice, const RealVector& vparams)
+{
+  wf_.compute(lattice, vparams, 0);
   // try for a well condictioned amplitude matrix
+  basis_state_.set_random();
   int num_attempt = 0;
   while (true) {
     wf_.get_amplitudes(psi_mat_,basis_state_.upspin_sites(), basis_state_.dnspin_sites());
@@ -38,20 +53,38 @@ void SysConfig::init(const Lattice& lattice)
     }
   }
   psi_inv_ = psi_mat_.inverse();
+  return 0;
+}
 
-  // work arrays
-  psi_row_.resize(num_dnspins_);
-  psi_col_.resize(num_upspins_);
-  inv_row_.resize(num_upspins_);
-
-  // update parameters
+int SysConfig::reset(void)
+{
+  // reset run parameters
   num_updates_ = 0;
   refresh_cycle_ = 100;
+  return 0;
 }
 
-void SysConfig::update_state(void)
+int SysConfig::update_state(void)
 {
-
+  for (int n=0; n<num_upspins_; ++n) do_upspin_hop();
+  for (int n=0; n<num_dnspins_; ++n) do_dnspin_hop();
+  //for (int n=0; n<num_exchange_moves_; ++n) do_spin_exchange();
+  num_updates_++;
+  if (num_updates_ % refresh_cycle_ == 0) {
+    psi_inv_ = psi_mat_.inverse();
+  }
+  return 0;
 }
+
+int SysConfig::do_upspin_hop(void)
+{
+  return 0;
+}
+
+int SysConfig::do_dnspin_hop(void)
+{
+  return 0;
+}
+
 
 

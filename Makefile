@@ -25,6 +25,7 @@ SRC+= random.cpp
 SRC+= basis.cpp
 SRC+= wavefunction.cpp
 SRC+= sysconfig.cpp
+SRC+= vmc.cpp
 SRCS=$(addprefix src/,$(SRC))
 #-------------------------------------------------------------
 # Headers
@@ -35,6 +36,7 @@ HDR+= basis.h
 HDR+= matrix.h
 HDR+= wavefunction.h
 HDR+= sysconfig.h
+HDR+= vmc.h
 HDRS=$(addprefix src/,$(HDR))
 #-------------------------------------------------------------
 # Target
