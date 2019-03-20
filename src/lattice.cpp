@@ -2,7 +2,7 @@
 * @Author: amedhi
 * @Date:   2019-03-19 13:12:20
 * @Last Modified by:   Amal Medhi, amedhi@mbpro
-* @Last Modified time: 2019-03-19 16:52:38
+* @Last Modified time: 2019-03-20 11:49:22
 *----------------------------------------------------------------------------*/
 // File: lattice.cpp
 
@@ -34,20 +34,7 @@ void Lattice::construct_square(const lattice_size& size)
 	a3_ = Vector3d(0,0,0);
 	construct_kpoints();
 
-	// Position Coordinates
-  Vector3i n = {0,0,0};
-  rpoints_.clear();
-  for (int i=0; i<num_sites_; ++i) {
-  	Vector3d R = n(0) * a1_ + n(1) * a2_ + n(2) * a3_;
-    rpoints_.push_back(R);
-    n = get_next_bravindex(n);
-  }
-  // check
-  /*for (int i=0; i<num_sites_; ++i) {
-    std::cout << i << ": " << rpoints_[i].transpose() << "\n";
-  }*/
-
-	//------- Nearest Neighbout Table
+  //------- Nearest Neighbout Table
   // Numbering scheme for the SQUARE lattice:
   /*
   *   12   13   14   15      
@@ -55,7 +42,7 @@ void Lattice::construct_square(const lattice_size& size)
   *    4    5    6    7     
   *    0    1    2    3    
   *-----------------------------------------*/
-	num_neighbs_ = 4; 
+  num_neighbs_ = 4; 
   nn_table_.resize(num_sites_);
   for (int i=0; i<num_sites_; ++i) nn_table_[i].resize(num_neighbs_);
 
@@ -89,19 +76,44 @@ void Lattice::construct_square(const lattice_size& size)
   for (int i=0; i<num_sites_; ++i) {
     std::cout << "nn_table[i][nn] = " << i << " " << nn_table_[i][0] 
       << " " << nn_table_[i][1] << " "
-    	<< nn_table_[i][2] << " " << nn_table_[i][3] << std::endl;
+      << nn_table_[i][2] << " " << nn_table_[i][3] << std::endl;
   }*/
 
+  // Position Coordinates
+  /*Vector3i n = {0,0,0};
+  rpoints_.clear();
+  for (int i=0; i<num_sites_; ++i) {
+    Vector3d R = n(0) * a1_ + n(1) * a2_ + n(2) * a3_;
+    rpoints_.push_back(R);
+    n = get_next_bravindex(n);
+  }*/
+  // check
+  /*for (int i=0; i<num_sites_; ++i) {
+    std::cout << i << ": " << rpoints_[i].transpose() << "\n";
+  }*/
+
+  // Sites in the lattice
+  sites_.clear();
+  Vector3i n = {0,0,0};
+  for (int i=0; i<num_sites_; ++i) {
+    Vector3d R = n(0)*a1_ + n(1)*a2_ + n(2)*a3_;
+    sites_.push_back(Site(i,0,R));
+    n = get_next_bravindex(n);
+  }
+
   // Bonds in the lattice
-	bonds_.clear();
-	for (int i=0; i<num_sites_; ++i) {
-		int nn1 = nn_table_[i][right_nn];
-		int nn2 = nn_table_[i][top_nn];
-		Vector3d R1 = rpoints_[nn1]-rpoints_[i];
-		Vector3d R2 = rpoints_[nn2]-rpoints_[i];
-		bonds_.push_back(Bond(i,nn1,R1));
-		bonds_.push_back(Bond(i,nn2,R2));
-	}
+  bonds_.clear();
+  int id = 0;
+  for (int i=0; i<num_sites_; ++i) {
+    int nn1 = nn_table_[i][right_nn];
+    int nn2 = nn_table_[i][top_nn];
+    Vector3d R1 = sites_[nn1].cell_coord()-sites_[i].cell_coord();
+    Vector3d R2 = sites_[nn2].cell_coord()-sites_[i].cell_coord();
+    bonds_.push_back(Bond(id,i,nn1,R1));
+    id++;
+    bonds_.push_back(Bond(id,i,nn2,R2));
+    id++;
+  }
   num_bonds_ = bonds_.size();
 }
 

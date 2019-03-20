@@ -11,5 +11,7 @@ using ComplexVector = Eigen::VectorXcd;
 using IntMatrix = Eigen::MatrixXi;
 using RealMatrix = Eigen::MatrixXd;
 using ComplexMatrix = Eigen::MatrixXcd;
+using ColVector = Eigen::VectorXcd;
+using RowVector = Eigen::RowVectorXcd;
 
 #endif

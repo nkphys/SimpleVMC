@@ -8,7 +8,9 @@
 #ifndef WAVEFUNCTION_H
 #define WAVEFUNCTION_H
 
+#include <complex>
 #include <Eigen/Eigenvalues>
+#include "./constants.h"
 #include "./matrix.h"
 #include "./lattice.h"
 
@@ -28,13 +30,13 @@ public:
   const int& num_dnspins(void) const { return num_dnspins_; }
   const int& num_vparams(void) const { return num_vparams_; }
   const double& hole_doping(void) const { return hole_doping_; }
-  //void get_amplitudes(Matrix& psi, const std::vector<int>& row,  
-  //  const std::vector<int>& col) const;
-  //void get_amplitudes(ColVector& psi_vec, const int& irow,  
-  //  const std::vector<int>& col) const;
-  //void get_amplitudes(RowVector& psi_vec, const std::vector<int>& row,
-  //  const int& icol) const;
-  //void get_amplitudes(amplitude_t& elem, const int& irow, const int& jcol) const;
+  void get_amplitudes(ComplexMatrix& ampl_mat, const std::vector<int>& row,  
+    const std::vector<int>& col) const;
+  void get_amplitudes(ColVector& ampl_vec, const int& irow,  
+    const std::vector<int>& col) const;
+  void get_amplitudes(RowVector& ampl_vec, const std::vector<int>& row,
+    const int& icol) const;
+  void get_amplitudes(std::complex<double>& elem, const int& irow, const int& jcol) const;
   //void get_gradients(Matrix& psi_grad, const int& n, 
   //  const std::vector<int>& row, const std::vector<int>& col) const;
 private:
@@ -46,11 +48,11 @@ private:
   int num_vparams_;
   double hole_doping_;
   double band_filling_;
+  double ch_potential_;
   RealVector vparams_;
-  RealMatrix psi_up_;
-  RealMatrix psi_dn_;
+  ComplexMatrix psi_;
   std::vector<RealMatrix> psi_gradient_;
-  bool have_gradient_{false};
+  //bool have_gradient_{false};
   // matrices & solvers
 	void set_particle_num(const double& hole_doping);
   void compute_BCS(const Lattice& lattice, const RealVector& vparams, 

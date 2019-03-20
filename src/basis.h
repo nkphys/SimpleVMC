@@ -27,6 +27,12 @@ public:
   void init(const int& num_sites, const bool& allow_dbl=true);
   void init_spins(const int& num_upspins, const int& num_dnspins);
   const ivector& state(void) const { return state_; }
+  const std::vector<int>& upspin_sites(void) const { return up_states_; }
+  const std::vector<int>& dnspin_sites(void) const 
+  { 
+    for (int i=0; i<num_dnspins_; ++i) dnspin_sites_[i] = dn_states_[i]-num_sites_;
+    return dnspin_sites_; 
+  }
   void set_random(void);
   bool gen_upspin_hop(void);
   bool gen_dnspin_hop(void);
@@ -57,6 +63,7 @@ private:
   std::vector<int> dn_states_;
   std::vector<int> uphole_states_;
   std::vector<int> dnhole_states_;
+  mutable std::vector<int> dnspin_sites_;
 
   // update moves
   mutable move_t proposed_move_;

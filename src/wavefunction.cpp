@@ -2,7 +2,7 @@
 * @Author: Amal Medhi, amedhi@mbpro
 * @Date:   2019-03-19 14:22:06
 * @Last Modified by:   Amal Medhi, amedhi@mbpro
-* @Last Modified time: 2019-03-19 23:34:38
+* @Last Modified time: 2019-03-20 12:43:05
 *----------------------------------------------------------------------------*/
 // File: wavefunction.cpp
 #include "wavefunction.h"
@@ -21,6 +21,7 @@ void Wavefunction::init(const wf_id& id, const Lattice& lattice, const double& h
 			break;
 	}
   set_particle_num(hole_doping);
+  psi_.resize(num_sites_,num_sites_);
 }
 
 void Wavefunction::set_particle_num(const double& hole_doping) 
@@ -63,32 +64,103 @@ void Wavefunction::compute_BCS(const Lattice& lattice, const RealVector& vparams
     const int& start_pos, const bool& psi_gradient)
 {
   if (lattice.id() != lattice_id::SQUARE) {
-    throw std::range_error("BCS wavefunction is not implemented for this lattice\n");
-  }
 
-  double Delta = vparams(start_pos);
-  // BCS pair amplitudes for one band system 
-  /*
-  for (int k=0; k<lattice.num_kpoints(); ++k) {
-    Vector3d kvec = lattice.kpoint(k);
-    //----------------------------------
-    //std::cout << "** Hack at BCS_State\n";
-    //ek = -4.0*(std::cos(kvec[0])+std::cos(kvec[1]));
-    //delta_k = 0.5 * (std::cos(kvec[0])-std::cos(kvec[1])); 
-    //----------------------------------
-    double deltak_sq = std::norm(delta_k);
-    double ek_plus_Ek = ek + std::sqrt(ek*ek + 4.0*deltak_sq);
-    if (std::sqrt(deltak_sq)<1.0E-12 && ek<0.0) {
-      phi_k[k](0,0) = large_number_ * std::exp(ii()*std::arg(delta_k));
+    // Chemical potential (non-interacting system) 
+    ch_potential_ = 0.0;
+    std::vector<double> ek;
+    for (int k=0; k<lattice.num_kpoints(); ++k) {
+      Vector3d kvec = lattice.kpoint(k);
+      double cos_kx = std::cos(kvec[0]);
+      double cos_ky = std::cos(kvec[1]);
+      double e = -2.0*(cos_kx+cos_ky);
+      ek.push_back(e);
+    }
+    std::sort(ek.begin(),ek.end());
+    if (num_upspins_ < num_sites_) {
+      ch_potential_ = 0.5*(ek[num_upspins_-1]+ek[num_upspins_]);
     }
     else {
-      phi_k[k](0,0) = 2.0*delta_k/ek_plus_Ek;
+      ch_potential_ = ek[num_upspins_-1];
+    }
+
+    //------------BCS wavefunction for SQUARE lattice-----------
+    double delta_sc = vparams(start_pos);
+    double large_number = 1.0E+4;
+    // k-space pair amplitudes 'phi_k' 
+    RealVector phi_k(lattice.num_kpoints());
+    for (int k=0; k<lattice.num_kpoints(); ++k) {
+      Vector3d kvec = lattice.kpoint(k);
+      double cos_kx = std::cos(kvec[0]);
+      double cos_ky = std::cos(kvec[1]);
+      double ek = -2.0*(cos_kx+cos_ky) - ch_potential_;
+      if (std::abs(delta_sc) < 1.0E-12) {
+        // wavefunction reduces to FEARMISEA
+        if (ek < 0.0) phi_k[k] = 1.0;
+        else phi_k[k] = 0.0;
+      }
+      else {
+        double deltak = delta_sc*(cos_kx-cos_ky); 
+        double deltak_sq = deltak*deltak;
+        if (std::sqrt(deltak_sq)<1.0E-12 && ek<0.0) {
+          // singular k-points
+          phi_k[k] = large_number; 
+        }
+        else {
+          double eps_k = std::sqrt(ek*ek + deltak_sq);
+          phi_k[k] = deltak/(ek+eps_k);
+        }
+      }
+    }
+    // pair amplitudes in lattice space
+    for (int i=0; i<num_sites_; ++i) {
+      Vector3d R_i = lattice.site(i).cell_coord();
+      for (int j=0; j<num_sites_; ++j) {
+        Vector3d R_j = lattice.site(j).cell_coord();
+        Vector3d R_ij = R_i-R_j;
+        std::complex<double> ksum=0.0;
+        for (int k=0; k<lattice.num_kpoints(); ++k) {
+          Vector3d kvec = lattice.kpoint(k);
+          std::complex<double> exp_kdor=std::exp(II*kvec.dot(R_ij));
+          ksum += phi_k[k] * exp_kdor;
+        }
+        psi_(i,j) = ksum/double(lattice.num_kpoints());
+      }
     }
   }
-  */
+  else {
+    throw std::range_error("BCS wavefunction is not implemented for this lattice\n");
+  }
 }
 
+void Wavefunction::get_amplitudes(ComplexMatrix& ampl_mat, const std::vector<int>& row, 
+  const std::vector<int>& col) const
+{
+  for (int i=0; i<row.size(); ++i) {
+    for (int j=0; j<col.size(); ++j) {
+      ampl_mat(i,j) = psi_(row[i],col[j]);
+    }
+  }
+}
 
+void Wavefunction::get_amplitudes(ColVector& ampl_vec, const int& irow,  
+    const std::vector<int>& col) const
+{
+  for (int j=0; j<col.size(); ++j)
+    ampl_vec[j] = psi_(irow,col[j]);
+}
+
+void Wavefunction::get_amplitudes(RowVector& ampl_vec, const std::vector<int>& row,
+    const int& icol) const
+{
+  for (int j=0; j<row.size(); ++j)
+    ampl_vec[j] = psi_(row[j],icol);
+}
+
+void Wavefunction::get_amplitudes(std::complex<double>& elem, const int& irow, 
+  const int& jcol) const
+{
+  elem = psi_(irow,jcol);
+}
 
 
 

@@ -40,17 +40,35 @@ private:
 	int L3_;
 };
 
+class Site
+{
+public:
+	Site() {}
+	Site(const int& id, const int& basis_id, const Vector3d& cell_coord)
+		: id_{id}, basis_id_{basis_id}, cell_coord_{cell_coord} {}
+	~Site() {}
+	const int& id(void) const { return id_; }
+	const int& basis_id(void) const { return basis_id_; }
+	const Vector3d& cell_coord(void) const { return cell_coord_; }
+private:
+	int id_;
+	int basis_id_;
+	Vector3d cell_coord_;
+};
+
 class Bond
 {
 public:
 	Bond() {}
-	Bond(const int& src, const int& tgt, const Vector3d& vec)
-		: src_{src}, tgt_{tgt}, vector_{vec} {}
+	Bond(const int& id, const int& src, const int& tgt, const Vector3d& vec)
+		: id_{id}, src_{src}, tgt_{tgt}, vector_{vec} {}
 	~Bond() {}
+	const int& id(void) const { return id_; }
 	const int& src(void) const { return src_; }
 	const int& tgt(void) const { return tgt_; }
 	const Vector3d& vector(void) const { return vector_; }
 private:
+	int id_;
 	int src_{0};
 	int tgt_{0};
 	Vector3d vector_{0,0,0};
@@ -72,11 +90,12 @@ public:
 	const int& num_basis_sites(void) const { return num_basis_sites_; }
 	const int& num_kpoints(void) const { return num_kpoints_; }
 	const int& num_neighbs(void) const { return num_neighbs_; }
+	const Site& site(const int& i) const { return sites_[i]; }
 	const Bond& bond(const int& i) const { return bonds_[i]; }
 	const std::vector<int>& site_nn(const int& site) const { return nn_table_[site]; }
-	const Vector3d& kpoint(const int& i) { return kpoints_[i]; }
+	const Vector3d& kpoint(const int& i) const { return kpoints_[i]; }
 	const std::vector<Vector3d>& kpoints(void) { return kpoints_; }
-	const Vector3d& site_coord(const int& i) const { return rpoints_[i]; }
+	//const Vector3d& site_coord(const int& i) const { return rpoints_[i]; }
 private:
 	lattice_id id_;
 	lattice_size size_;
@@ -92,10 +111,11 @@ private:
 	Vector3d b1_;
 	Vector3d b2_;
 	Vector3d b3_;
-	std::vector<Vector3d> kpoints_;
-	std::vector<Vector3d> rpoints_; // position coordinates
-	std::vector<std::vector<int> > nn_table_;
+	std::vector<Site> sites_;
 	std::vector<Bond> bonds_;
+	std::vector<Vector3d> kpoints_;
+	//std::vector<Vector3d> rpoints_; // position coordinates
+	std::vector<std::vector<int> > nn_table_;
 	void construct_square(const lattice_size& size);
 	void construct_kpoints(void);
 	Vector3i get_next_bravindex(const Vector3i& current_index) const;

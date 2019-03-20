@@ -2,7 +2,7 @@
 * @Author: amedhi
 * @Date:   2019-03-19 13:44:44
 * @Last Modified by:   Amal Medhi, amedhi@mbpro
-* @Last Modified time: 2019-03-19 14:19:56
+* @Last Modified time: 2019-03-20 12:35:27
 *----------------------------------------------------------------------------*/
 // Files: basis.cpp
 #include "basis.h"
@@ -40,6 +40,7 @@ void FockBasis::init_spins(const int& num_upspins, const int& num_dnspins)
   // resizing
   up_states_.resize(num_upspins_);
   dn_states_.resize(num_dnspins_);
+  dnspin_sites_.resize(num_dnspins_);
   uphole_states_.resize(num_upholes_);
   dnhole_states_.resize(num_dnholes_);
   // random generator
