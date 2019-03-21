@@ -2,19 +2,20 @@
 * @Author: Amal Medhi, amedhi@mbpro
 * @Date:   2019-03-20 11:50:30
 * @Last Modified by:   Amal Medhi, amedhi@mbpro
-* @Last Modified time: 2019-03-21 10:38:08
+* @Last Modified time: 2019-03-21 11:38:00
 *----------------------------------------------------------------------------*/
 // File: sysconfig.cpp
 #include <iomanip>
 #include "sysconfig.h"
 
-void SysConfig::init(const Lattice& lattice)
+void SysConfig::init(const lattice_id& lid, const lattice_size& size, const wf_id& wid)
 {
+  lattice_.construct(lid,size);
   // one body part of the wavefunction
-  num_sites_ = lattice.num_sites();
+  num_sites_ = lattice_.num_sites();
   basis_state_.init(num_sites_);
   hole_doping_ = 0.0;
-  wf_.init(wf_id::BCS, lattice, hole_doping_);
+  wf_.init(wid, lattice_, hole_doping_);
   num_upspins_ = wf_.num_upspins();
   num_dnspins_ = wf_.num_dnspins();
   basis_state_.init_spins(num_upspins_,num_dnspins_);
@@ -32,9 +33,9 @@ void SysConfig::init(const Lattice& lattice)
   inv_row_.resize(num_upspins_);
 }
 
-int SysConfig::build(const Lattice& lattice, const RealVector& vparams)
+int SysConfig::build(const RealVector& vparams)
 {
-  wf_.compute(lattice, vparams, 0);
+  wf_.compute(lattice_, vparams, 0);
   return 0;
 }
 
@@ -184,4 +185,15 @@ void SysConfig::print_stats(std::ostream& os) const
   os << std::resetiosflags(std::ios_base::floatfield) << std::setprecision(dp);
 }
 
+double SysConfig::get_energy(void) const
+{
+  // hopping energy
+  //double bond_sum = 0.0;
+  //for (int i=0; i<lattice.num_bonds(); ++i) {
+  //  int src = lattice.bond(i).src();
+  //  int tgt = lattice.bond(i).tgt();
+  //}
+
+  return 1.0;
+}
 

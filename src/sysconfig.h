@@ -18,20 +18,23 @@ class SysConfig
 {
 public:
 	SysConfig() {}
-	SysConfig(const Lattice& lattice) { init(lattice); }
+	SysConfig(const lattice_id& lid, const lattice_size& size, const wf_id& wid) 
+		{ init(lid, size, wid); }
 	~SysConfig() {}
-	void init(const Lattice& lattice);
-	int build(const Lattice& lattice, const RealVector& vparams);
+	void init(const lattice_id& id, const lattice_size& size, const wf_id& wid);
+	int build(const RealVector& vparams);
 	int init_state(void);
 	int update_state(void);
 	const int& num_vparams(void) const { return num_total_vparams_; }
   void print_stats(std::ostream& os=std::cout) const;
+  double get_energy(void) const;
 private:
+	Lattice lattice_;
+	FockBasis basis_state_;
 	int num_sites_;
 	int num_upspins_;
 	int num_dnspins_;
 	double hole_doping_;
-	FockBasis basis_state_;
 	Wavefunction wf_;
 	ComplexMatrix psi_mat_;
 	ComplexMatrix psi_inv_;

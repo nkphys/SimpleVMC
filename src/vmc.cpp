@@ -2,7 +2,7 @@
 * @Author: Amal Medhi, amedhi@mbpro
 * @Date:   2019-03-20 13:07:50
 * @Last Modified by:   Amal Medhi, amedhi@mbpro
-* @Last Modified time: 2019-03-21 10:39:08
+* @Last Modified time: 2019-03-21 11:33:20
 *----------------------------------------------------------------------------*/
 // File: vmc.cpp
 
@@ -10,8 +10,7 @@
 
 int VMC::init(void) 
 {
-  lattice.construct(lattice_id::SQUARE, lattice_size(8,8));
-  config.init(lattice);
+  config.init(lattice_id::SQUARE,lattice_size(8,8),wf_id::BCS);
   num_vparams = config.num_vparams();
   vparams.resize(num_vparams);
 
@@ -20,6 +19,9 @@ int VMC::init(void)
   warmup_steps = 100;
   interval = 3;
 
+  // observables
+  energy.init("Energy");
+
   return 0;
 }
 
@@ -27,7 +29,7 @@ int VMC::run_simulation(void)
 {
   // set variational parameters
   vparams.setOnes();
-  config.build(lattice, vparams);
+  config.build(vparams);
 
   // warmup run
   config.init_state();
@@ -39,6 +41,7 @@ int VMC::run_simulation(void)
   int sample = 0;
   int skip_count = interval;
   // Initialize observables
+  energy.reset();
   while (sample < num_samples) {
     if (skip_count == interval) {
       skip_count = 0;
@@ -46,6 +49,7 @@ int VMC::run_simulation(void)
       int progress = int((100.0*sample)/num_samples);
       if (progress%10==0) std::cout<<" done = "<<progress<<"% \n";
       // Make measurements
+      energy << config.get_energy();
     }
     config.update_state();
     skip_count++;
@@ -53,6 +57,8 @@ int VMC::run_simulation(void)
   // Finalize observables
   std::cout << " simulation done\n";
   config.print_stats();
+  // results
+  std::cout << "Energy mean = " << energy.mean() << "\n";
 
   return 0;
 }

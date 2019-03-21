@@ -2,7 +2,7 @@
 * @Author: amedhi
 * @Date:   2019-03-19 13:44:44
 * @Last Modified by:   Amal Medhi, amedhi@mbpro
-* @Last Modified time: 2019-03-21 10:22:11
+* @Last Modified time: 2019-03-21 11:05:45
 *----------------------------------------------------------------------------*/
 // Files: basis.cpp
 #include "basis.h"
@@ -166,7 +166,7 @@ const int& FockBasis::which_dnspin(void) const
   }
 }
 
-const int& FockBasis::which_site(void) const
+int FockBasis::which_site(void) const
 {
   if (proposed_move_==move_t::upspin_hop) {
     return up_to_state_;

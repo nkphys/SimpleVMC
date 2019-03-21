@@ -9,8 +9,8 @@
 #define VMC_H
 
 #include <iostream>
-#include "lattice.h"
 #include "sysconfig.h"
+#include "mcdata/mc_observable.h"
 
 class VMC
 {
@@ -20,13 +20,15 @@ public:
 	int init(void);
 	int run_simulation(void);
 private:
-	Lattice lattice;
 	SysConfig config;
 	RealVector vparams;
 	int num_vparams;
 	int num_samples;
 	int warmup_steps;
 	int interval;
+
+	// observables
+	mcdata::MC_Observable energy;
 };
 
 

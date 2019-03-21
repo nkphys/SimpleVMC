@@ -39,7 +39,7 @@ public:
   bool gen_exchange_move(void);
   const int& which_upspin(void) const;
   const int& which_dnspin(void) const;
-  const int& which_site(void) const; 
+  int which_site(void) const; 
   void commit_last_move(void);
   void undo_last_move(void) const;
   int op_ni_up(const int& site) const;
