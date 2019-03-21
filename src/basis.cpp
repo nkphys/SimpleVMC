@@ -2,7 +2,7 @@
 * @Author: amedhi
 * @Date:   2019-03-19 13:44:44
 * @Last Modified by:   Amal Medhi, amedhi@mbpro
-* @Last Modified time: 2019-03-20 16:37:55
+* @Last Modified time: 2019-03-21 10:22:11
 *----------------------------------------------------------------------------*/
 // Files: basis.cpp
 #include "basis.h"
@@ -143,6 +143,39 @@ bool FockBasis::gen_upspin_hop(void)
     //fr_state = up_fr_state_;
     //to_state = up_to_state_;
     return true;
+  }
+}
+
+const int& FockBasis::which_upspin(void) const
+{
+  if (proposed_move_==move_t::upspin_hop) {
+    return mv_upspin_;
+  }
+  else {
+    throw std::logic_error("FockBasis::which_upspin: no upspin move exists");
+  }
+}
+
+const int& FockBasis::which_dnspin(void) const
+{
+  if (proposed_move_==move_t::dnspin_hop) {
+    return mv_dnspin_;
+  }
+  else {
+    throw std::logic_error("FockBasis::which_dnspin: no dnspin move exists");
+  }
+}
+
+const int& FockBasis::which_site(void) const
+{
+  if (proposed_move_==move_t::upspin_hop) {
+    return up_to_state_;
+  }
+  else if (proposed_move_==move_t::dnspin_hop) {
+    return dn_to_state_-num_sites_;
+  }
+  else {
+    throw std::logic_error("FockBasis::which_site: no existing move");
   }
 }
 

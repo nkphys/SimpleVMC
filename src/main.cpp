@@ -2,7 +2,7 @@
 * @Author: amedhi
 * @Date:   2019-03-19 13:12:20
 * @Last Modified by:   Amal Medhi, amedhi@mbpro
-* @Last Modified time: 2019-03-20 13:28:44
+* @Last Modified time: 2019-03-20 16:45:18
 *----------------------------------------------------------------------------*/
 
 #include <iostream>
@@ -14,5 +14,4 @@ int main(int argc, const char *argv[])
 
   vmc.init();
   vmc.run_simulation();
-
 }

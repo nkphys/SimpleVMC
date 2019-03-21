@@ -12,6 +12,8 @@
 #include "wavefunction.h"
 #include "basis.h"
 
+using amplitude_t = std::complex<double>;
+
 class SysConfig
 {
 public:
@@ -20,9 +22,10 @@ public:
 	~SysConfig() {}
 	void init(const Lattice& lattice);
 	int build(const Lattice& lattice, const RealVector& vparams);
-	int reset(void);
+	int init_state(void);
 	int update_state(void);
 	const int& num_vparams(void) const { return num_total_vparams_; }
+  void print_stats(std::ostream& os=std::cout) const;
 private:
 	int num_sites_;
 	int num_upspins_;
@@ -45,6 +48,8 @@ private:
 	// update parameters_
   int num_updates_;
   int refresh_cycle_;
+  int num_proposed_moves_;
+  int num_accepted_moves_;
 
   int do_upspin_hop(void);
   int do_dnspin_hop(void);

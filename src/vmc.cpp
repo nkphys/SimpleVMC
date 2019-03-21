@@ -2,7 +2,7 @@
 * @Author: Amal Medhi, amedhi@mbpro
 * @Date:   2019-03-20 13:07:50
 * @Last Modified by:   Amal Medhi, amedhi@mbpro
-* @Last Modified time: 2019-03-20 16:44:06
+* @Last Modified time: 2019-03-21 10:39:08
 *----------------------------------------------------------------------------*/
 // File: vmc.cpp
 
@@ -10,12 +10,11 @@
 
 int VMC::init(void) 
 {
-  lattice.construct(lattice_id::SQUARE, lattice_size(4,4));
+  lattice.construct(lattice_id::SQUARE, lattice_size(8,8));
   config.init(lattice);
   num_vparams = config.num_vparams();
   vparams.resize(num_vparams);
 
-  //config.build(lattice);
   // run parameters
   num_samples = 100;
   warmup_steps = 100;
@@ -31,7 +30,7 @@ int VMC::run_simulation(void)
   config.build(lattice, vparams);
 
   // warmup run
-  config.reset();
+  config.init_state();
   for (int n=0; n<warmup_steps; ++n) {
     config.update_state();
   } 
@@ -53,6 +52,7 @@ int VMC::run_simulation(void)
   }
   // Finalize observables
   std::cout << " simulation done\n";
+  config.print_stats();
 
   return 0;
 }
