@@ -2,7 +2,7 @@
 * @Author: Amal Medhi, amedhi@mbpro
 * @Date:   2019-03-20 11:50:30
 * @Last Modified by:   Amal Medhi, amedhi@mbpro
-* @Last Modified time: 2019-03-21 11:38:00
+* @Last Modified time: 2019-03-22 00:09:08
 *----------------------------------------------------------------------------*/
 // File: sysconfig.cpp
 #include <iomanip>
@@ -188,12 +188,30 @@ void SysConfig::print_stats(std::ostream& os) const
 double SysConfig::get_energy(void) const
 {
   // hopping energy
-  //double bond_sum = 0.0;
-  //for (int i=0; i<lattice.num_bonds(); ++i) {
-  //  int src = lattice.bond(i).src();
-  //  int tgt = lattice.bond(i).tgt();
-  //}
+  double bond_sum = 0.0;
+  for (int i=0; i<lattice_.num_bonds(); ++i) {
+    int src = lattice_.bond(i).src();
+    int tgt = lattice_.bond(i).tgt();
+    int phase = lattice_.bond(i).phase();
+    // upspin hop
+    if (basis_state_.op_cdagc_up(src,tgt)) {
+      int upspin = basis_state_.which_upspin();
+      int to_site = basis_state_.which_site();
+      wf_.get_amplitudes(psi_row_,to_site,basis_state_.dnspin_sites());
+      amplitude_t det_ratio = psi_row_.cwiseProduct(psi_inv_.col(upspin)).sum();
+      bond_sum += std::real(det_ratio)*phase;
+    }
+    // dnspin hop
+    if (basis_state_.op_cdagc_dn(src,tgt)) {
+      int dnspin = basis_state_.which_dnspin();
+      int to_site = basis_state_.which_site();
+      wf_.get_amplitudes(psi_col_,basis_state_.upspin_sites(),to_site);
+      amplitude_t det_ratio = psi_col_.cwiseProduct(psi_inv_.row(dnspin)).sum();
+      bond_sum += std::real(det_ratio)*phase;
+    }
+  }
 
-  return 1.0;
+  double t=1.0;
+  return -t*bond_sum/num_sites_;
 }
 

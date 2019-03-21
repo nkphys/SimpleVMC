@@ -2,7 +2,7 @@
 * @Author: Amal Medhi, amedhi@mbpro
 * @Date:   2019-03-20 13:07:50
 * @Last Modified by:   Amal Medhi, amedhi@mbpro
-* @Last Modified time: 2019-03-21 11:33:20
+* @Last Modified time: 2019-03-21 23:32:39
 *----------------------------------------------------------------------------*/
 // File: vmc.cpp
 
@@ -58,7 +58,8 @@ int VMC::run_simulation(void)
   std::cout << " simulation done\n";
   config.print_stats();
   // results
-  std::cout << "Energy mean = " << energy.mean() << "\n";
+  std::cout << "Energy = "<<energy.mean()<<" +/- "<<energy.stddev()<<"\n";
+  std::cout << "Samples = "<<energy.num_samples()<<"\n";
 
   return 0;
 }

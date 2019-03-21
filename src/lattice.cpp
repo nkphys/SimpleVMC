@@ -2,7 +2,7 @@
 * @Author: amedhi
 * @Date:   2019-03-19 13:12:20
 * @Last Modified by:   Amal Medhi, amedhi@mbpro
-* @Last Modified time: 2019-03-20 16:18:44
+* @Last Modified time: 2019-03-22 00:07:49
 *----------------------------------------------------------------------------*/
 // File: lattice.cpp
 
@@ -17,6 +17,7 @@ void Lattice::construct(const lattice_id& id, const lattice_size& size)
 	switch (id_) {
 		case lattice_id::SQUARE: 
 			lattice_dim_ = 2;
+      bc_ = {bc_t::PERIODIC, bc_t::ANTIPERIODIC, bc_t::OPEN};
 			construct_square(size);
 			break;
 		default: 
@@ -104,14 +105,21 @@ void Lattice::construct_square(const lattice_size& size)
   // Bonds in the lattice
   bonds_.clear();
   int id = 0;
+  int nn, phase;
+  Vector3d R;
   for (int i=0; i<num_sites_; ++i) {
-    int nn1 = nn_table_[i][right_nn];
-    int nn2 = nn_table_[i][top_nn];
-    Vector3d R1 = sites_[nn1].cell_coord()-sites_[i].cell_coord();
-    Vector3d R2 = sites_[nn2].cell_coord()-sites_[i].cell_coord();
-    bonds_.push_back(Bond(id,i,nn1,R1));
+    nn = nn_table_[i][right_nn];
+    phase = 1;
+    if (bc_.L1_bc()==bc_t::ANTIPERIODIC && nn<i) phase = -1;
+    R = sites_[nn].cell_coord()-sites_[i].cell_coord();
+    bonds_.push_back(Bond(id,i,nn,phase,R));
     id++;
-    bonds_.push_back(Bond(id,i,nn2,R2));
+
+    nn = nn_table_[i][top_nn];
+    phase = 1;
+    if (bc_.L2_bc()==bc_t::ANTIPERIODIC && nn<i) phase = -1;
+    R = sites_[nn].cell_coord()-sites_[i].cell_coord();
+    bonds_.push_back(Bond(id,i,nn,phase,R));
     id++;
   }
   num_bonds_ = bonds_.size();
@@ -146,9 +154,15 @@ void Lattice::construct_kpoints(void)
 
   // set 'antiperiodic boundary' along 'y'
   Vector3d antipb_shift(0.0,0.0,0.0);
-  if (lattice_dim_==2) {
+  if (bc_.L1_bc()==bc_t::ANTIPERIODIC) {
+    antipb_shift(0) = 0.5/size_.L1();
+  }
+  if (bc_.L2_bc()==bc_t::ANTIPERIODIC) {
     antipb_shift(1) = 0.5/size_.L2();
-  } 
+  }
+  if (bc_.L3_bc()==bc_t::ANTIPERIODIC) {
+    antipb_shift(2) = 0.5/size_.L3();
+  }
 
   // kpoints
   num_kpoints_ = num_sites_/num_basis_sites_;
