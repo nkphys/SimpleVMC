@@ -2,7 +2,7 @@
 * @Author: Amal Medhi, amedhi@mbpro
 * @Date:   2019-03-20 13:07:50
 * @Last Modified by:   Amal Medhi, amedhi@mbpro
-* @Last Modified time: 2019-03-21 23:32:39
+* @Last Modified time: 2019-03-28 11:36:59
 *----------------------------------------------------------------------------*/
 // File: vmc.cpp
 
@@ -10,13 +10,13 @@
 
 int VMC::init(void) 
 {
-  config.init(lattice_id::SQUARE,lattice_size(8,8),wf_id::BCS);
+  config.init(lattice_id::SQUARE,lattice_size(4,4),wf_id::BCS);
   num_vparams = config.num_vparams();
   vparams.resize(num_vparams);
 
   // run parameters
-  num_samples = 100;
-  warmup_steps = 100;
+  num_samples = 2000;
+  warmup_steps = 500;
   interval = 3;
 
   // observables
@@ -40,14 +40,18 @@ int VMC::run_simulation(void)
   // measuring run
   int sample = 0;
   int skip_count = interval;
+  int iwork_done = 0;
   // Initialize observables
   energy.reset();
   while (sample < num_samples) {
     if (skip_count == interval) {
       skip_count = 0;
       ++sample;
-      int progress = int((100.0*sample)/num_samples);
-      if (progress%10==0) std::cout<<" done = "<<progress<<"% \n";
+      int iwork = int((100.0*sample)/num_samples);
+      if (iwork%10==0 && iwork>iwork_done) {
+        iwork_done = iwork;
+        std::cout<<" done = "<<iwork<<"%\n";
+      }
       // Make measurements
       energy << config.get_energy();
     }

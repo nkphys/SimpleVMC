@@ -2,7 +2,7 @@
 * @Author: Amal Medhi, amedhi@mbpro
 * @Date:   2019-03-20 11:50:30
 * @Last Modified by:   Amal Medhi, amedhi@mbpro
-* @Last Modified time: 2019-03-22 00:09:08
+* @Last Modified time: 2019-03-28 10:15:42
 *----------------------------------------------------------------------------*/
 // File: sysconfig.cpp
 #include <iomanip>
@@ -59,6 +59,34 @@ int SysConfig::init_state(void)
       throw std::underflow_error("*SysConfig::init: configuration wave function ill conditioned.");
     }
   }
+  /*
+  std::cout << "HACK at sysconfig.cpp: L62\n";
+  basis_state_.set_custom();
+  std::cout << basis_state_ << "\n";
+  wf_.get_amplitudes(psi_mat_,basis_state_.upspin_sites(), basis_state_.dnspin_sites());
+  psi_inv_ = psi_mat_.inverse();
+  //std::cout << psi_mat_ << "\n"; getchar();
+  double bond_sum = 0.0;
+  if (basis_state_.op_cdagc_up(1,8)) {
+    int upspin = basis_state_.which_upspin();
+    int to_site = basis_state_.which_site();
+    wf_.get_amplitudes(psi_row_,to_site,basis_state_.dnspin_sites());
+    amplitude_t det_ratio = psi_row_.cwiseProduct(psi_inv_.col(upspin)).sum();
+    bond_sum += std::real(det_ratio);
+    std::cout << det_ratio << "\n";
+  }
+  if (basis_state_.op_cdagc_up(1,8)) {
+    int upspin = basis_state_.which_upspin();
+    int to_site = basis_state_.which_site();
+    wf_.get_amplitudes(psi_row_,to_site,basis_state_.dnspin_sites());
+    amplitude_t det_ratio = psi_row_.cwiseProduct(psi_inv_.col(upspin)).sum();
+    bond_sum += std::real(det_ratio);
+    std::cout << det_ratio << "\n";
+  }
+  getchar();
+  */
+
+  //std::cout << psi_mat_ << "\n"; getchar();
   psi_inv_ = psi_mat_.inverse();
   // reset run parameters
   num_updates_ = 0;

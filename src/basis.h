@@ -34,6 +34,7 @@ public:
     return dnspin_sites_; 
   }
   void set_random(void);
+  void set_custom(void);
   bool gen_upspin_hop(void);
   bool gen_dnspin_hop(void);
   bool gen_exchange_move(void);
@@ -54,6 +55,7 @@ public:
 private:
   mutable RandomGenerator rng_;
   mutable ivector state_;
+  ivector spin_id_;  // store which UP-spin for a given state index
   int num_sites_{0};
   int num_states_{0};
   int num_upspins_{0};
@@ -83,7 +85,7 @@ private:
   mutable int mv_dnhole_;
   mutable int dn_tostate_;
   mutable int op_sign_;
-  int null_object_{-1};
+  int null_id_{-1};
   void clear(void); 
 };
  

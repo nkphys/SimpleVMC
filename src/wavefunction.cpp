@@ -2,7 +2,7 @@
 * @Author: Amal Medhi, amedhi@mbpro
 * @Date:   2019-03-19 14:22:06
 * @Last Modified by:   Amal Medhi, amedhi@mbpro
-* @Last Modified time: 2019-03-20 16:38:04
+* @Last Modified time: 2019-03-24 11:48:35
 *----------------------------------------------------------------------------*/
 // File: wavefunction.cpp
 #include "wavefunction.h"
@@ -125,6 +125,7 @@ void Wavefunction::compute_BCS(const Lattice& lattice, const RealVector& vparams
           ksum += phi_k[k] * exp_kdor;
         }
         psi_(i,j) = ksum/double(lattice.num_kpoints());
+        //std::cout << "phi["<<i<<","<<j<<"] = "<<psi_(i,j)<<"\n"; getchar();
       }
     }
   }

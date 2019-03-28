@@ -2,7 +2,7 @@
 * @Author: amedhi
 * @Date:   2019-03-19 13:44:44
 * @Last Modified by:   Amal Medhi, amedhi@mbpro
-* @Last Modified time: 2019-03-21 11:05:45
+* @Last Modified time: 2019-03-28 11:35:00
 *----------------------------------------------------------------------------*/
 // Files: basis.cpp
 #include "basis.h"
@@ -15,6 +15,8 @@ void FockBasis::init(const int& num_sites, const bool& allow_dbl)
   num_states_ = 2*num_sites_;
   state_.resize(num_states_);
   state_.setZero();
+  spin_id_.resize(num_states_);
+  spin_id_.setConstant(-1); 
   double_occupancy_ = allow_dbl;
   up_states_.clear();
   dn_states_.clear();
@@ -66,6 +68,7 @@ void FockBasis::set_random(void)
   for (int i=0; i<num_upspins_; ++i) {
     int state = all_up_states[i];
     state_[state] = 1;
+    spin_id_[state] = i;
     up_states_[i] = state;
   }
   int j=0;
@@ -81,6 +84,7 @@ void FockBasis::set_random(void)
     for (int i=0; i<num_dnspins_; ++i) {
       int state = all_dn_states[i];
       state_[state] = 1;
+      spin_id_[state] = i;
       dn_states_[i] = state;
     }
     int j = 0;
@@ -95,6 +99,7 @@ void FockBasis::set_random(void)
     for (int i=num_upspins_; i<total_spins; ++i) {
       int state = num_sites_+all_up_states[i];
       state_[state] = 1;
+      spin_id_[state] = j;
       dn_states_[j++] = state;
     }
     // DN holes
@@ -108,6 +113,50 @@ void FockBasis::set_random(void)
       dnhole_states_[j++] = state;
     }
   }
+  // number of doublely occupied sites
+  num_dblocc_sites_ = 0;
+  if (double_occupancy_) {
+    for (int i=0; i<num_sites_; ++i) {
+      if (state_[i]==1 && state_[i+num_sites_]==1)
+        num_dblocc_sites_++;
+    }
+  }
+}
+
+void FockBasis::set_custom(void)
+{
+  proposed_move_ = move_t::null;
+  state_.setZero();
+  std::vector<int> all_up_states(num_sites_);
+  for (int i=0; i<num_sites_; ++i) all_up_states[i] = i;
+  //std::shuffle(all_up_states.begin(),all_up_states.end(),rng_);
+  for (int i=0; i<num_upspins_; ++i) {
+    int state = all_up_states[i];
+    state_[state] = 1;
+    spin_id_[state] = i;
+    up_states_[i] = state;
+  }
+  int j=0;
+  for (int i=num_upspins_; i<num_sites_; ++i) {
+    uphole_states_[j++] = all_up_states[i];
+  }
+
+  // DN spins & holes
+  std::vector<int> all_dn_states(num_sites_);
+  for (int i=0; i<num_sites_; ++i) all_dn_states[i] = num_sites_+i;
+  //std::shuffle(all_dn_states.begin(),all_dn_states.end(),rng_);
+  int last_site = num_sites_-1;
+  for (int i=0; i<num_dnspins_; ++i) {
+    int state = all_dn_states[last_site-i];
+    state_[state] = 1;
+    spin_id_[state] = i;
+    dn_states_[i] = state;
+  }
+  j = 0;
+  for (int i=num_dnspins_; i<num_sites_; ++i) {
+    dnhole_states_[j++] = all_dn_states[last_site-i];
+  }
+
   // number of doublely occupied sites
   num_dblocc_sites_ = 0;
   if (double_occupancy_) {
@@ -269,6 +318,7 @@ bool FockBasis::op_cdagc_up(const int& site_i, const int& site_j) const
     up_to_state_ = site_j;
   }
   else return false;
+  mv_upspin_ = spin_id_[up_fr_state_];
   op_sign_ = 1;
   dblocc_increament_ = 0;
   if (up_fr_state_==up_to_state_ && state_[up_fr_state_]) return true;
@@ -292,15 +342,18 @@ bool FockBasis::op_cdagc_up(const int& site_i, const int& site_j) const
 bool FockBasis::op_cdagc_dn(const int& site_i, const int& site_j) const
 {
   if (proposed_move_!=move_t::null) undo_last_move();
-  if (state_[site_i]==0 && state_[site_j]==1) {
-    dn_fr_state_ = num_sites_+site_j;
-    dn_to_state_ = num_sites_+site_i;
+  int idx_i = num_sites_+site_i;
+  int idx_j = num_sites_+site_j;
+  if (state_[idx_i]==0 && state_[idx_j]==1) {
+    dn_fr_state_ = idx_j; 
+    dn_to_state_ = idx_i; 
   }
-  else if (state_[site_i]==1 && state_[site_j]==0) {
-    dn_fr_state_ = num_sites_+site_i;
-    dn_to_state_ = num_sites_+site_j;
+  else if (state_[idx_i]==1 && state_[idx_j]==0) {
+    dn_fr_state_ = idx_i;
+    dn_to_state_ = idx_j;
   }
   else return false;
+  mv_dnspin_ = spin_id_[dn_fr_state_];
   op_sign_ = 1;
   dblocc_increament_ = 0;
   if (dn_fr_state_==dn_to_state_ && state_[dn_fr_state_]) return true;
@@ -379,6 +432,8 @@ void FockBasis::commit_last_move(void)
       num_dblocc_sites_ += dblocc_increament_;
       //operator[](up_fr_state_) = 0;
       //operator[](up_to_state_) = 1;
+      spin_id_[up_fr_state_] = null_id_;
+      spin_id_[up_to_state_] = mv_upspin_;
       up_states_[mv_upspin_] = up_to_state_;
       uphole_states_[mv_uphole_] = up_fr_state_;
       proposed_move_ = move_t::null;
@@ -387,11 +442,17 @@ void FockBasis::commit_last_move(void)
       num_dblocc_sites_ += dblocc_increament_;
       //operator[](dn_fr_state_) = 0;
       //operator[](dn_to_state_) = 1;
+      spin_id_[dn_fr_state_] = null_id_;
+      spin_id_[dn_to_state_] = mv_dnspin_;
       dn_states_[mv_dnspin_] = dn_to_state_;
       dnhole_states_[mv_dnhole_] = dn_fr_state_;
       proposed_move_ = move_t::null;
       break;
     case move_t::exchange:
+      spin_id_[up_fr_state_] = null_id_;
+      spin_id_[up_to_state_] = mv_upspin_;
+      spin_id_[dn_fr_state_] = null_id_;
+      spin_id_[dn_to_state_] = mv_dnspin_;
       up_states_[mv_upspin_] = up_to_state_;
       uphole_states_[mv_uphole_] = up_fr_state_;
       dn_states_[mv_dnspin_] = dn_to_state_;
