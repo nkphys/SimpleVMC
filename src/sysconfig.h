@@ -30,7 +30,7 @@ public:
   double get_energy(void) const;
 private:
 	Lattice lattice_;
-	FockBasis basis_state_;
+    FockBasis basis_state_;
 	int num_sites_;
 	int num_upspins_;
 	int num_dnspins_;
